@@ -11,6 +11,31 @@ templ Base() {
 			<script src="assets/js/htmx.min.js"></script>
 		</head>
 		<body class="bg-gray-100">
+			<aside class="fixed top-0 left-0 h-full w-[260px] bg-[#161a2d] p-6">
+				<div class="flex items-center">
+					<h2 class="font-semibold">Marriner</h2>
+				</div>
+				<ul>
+					<h4 class="font-medium m-2.5 text-[#fff] whitespace-nowrap">
+						<span>Main Menu</span>
+					</h4>
+					<li class="mt-5">
+						<a href="#" class="flex items-center gap-5 text-[#dbd4d4e3] font-medium p-5 whitespace-nowrap"><span>Dashboard</span></a>
+					</li>
+					<h4 class="font-medium m-2.5 text-[#fff] whitespace-nowrap">
+						<span>Catalog</span>
+					</h4>
+					<li class="mt-5">
+						<a href="#" class="flex items-center gap-5 text-[#dbd4d4e3] font-medium p-5 whitespace-nowrap"><span>Servers</span></a>
+					</li>
+					<h4 class="font-medium m-2.5 text-[#fff] whitespace-nowrap">
+						<span>Create</span>
+					</h4>
+					<li class="mt-5">
+						<a href="#" class="flex items-center gap-5 text-[#dbd4d4e3] font-medium p-5 whitespace-nowrap"><span>Games</span></a>
+					</li>
+				</ul>
+			</aside>
 			<main class="max-w-sm mx-auto p-4">
 				{ children... }
 			</main>
