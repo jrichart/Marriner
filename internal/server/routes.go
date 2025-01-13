@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -31,8 +32,9 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	fileServer := http.FileServer(http.FS(web.Files))
 	r.Handle("/assets/*", fileServer)
-	r.Get("/web", templ.Handler(web.CatalogList(web.CatalogItems())).ServeHTTP)
+	r.Get("/web", templ.Handler(web.CatalogList(s.CatalogItemsMapping())).ServeHTTP)
 	r.Post("/hello", web.HelloWebHandler)
+	r.Get("/tasks", s.TaskHandler)
 
 	return r
 }
@@ -49,7 +51,39 @@ func (s *Server) HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(jsonResp)
 }
 
+func (s *Server) CatalogItemsMapping() []web.CatalogItem {
+	servers, err := s.Catalog.GetGameServers()
+	if err != nil {
+		log.Println(fmt.Errorf("getting games servers: %w", err))
+	}
+	catalog := []web.CatalogItem{}
+	for _, server := range servers {
+		item := web.CatalogItem{
+			Title:       server.Name,
+			Description: server.Image,
+			Type:        "Service",
+			Owner:       "Cube-go",
+			Tags:        []string{"golang", "Server", "api", server.HealthCheck},
+		}
+		catalog = append(catalog, item)
+	}
+	return catalog
+}
+
 func (s *Server) healthHandler(w http.ResponseWriter, r *http.Request) {
 	jsonResp, _ := json.Marshal(s.db.Health())
+	_, _ = w.Write(jsonResp)
+}
+
+func (s *Server) TaskHandler(w http.ResponseWriter, r *http.Request) {
+	servers, err := s.Catalog.GetGameServers()
+	if err != nil {
+		log.Println(fmt.Errorf("getting games servers: %w", err))
+	}
+	jsonResp, err := json.Marshal(servers)
+	if err != nil {
+		log.Println(fmt.Errorf("marshalling json: %w", err))
+	}
+
 	_, _ = w.Write(jsonResp)
 }

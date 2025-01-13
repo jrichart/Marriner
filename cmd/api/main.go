@@ -38,15 +38,26 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 
 func main() {
 
-	server := server.NewServer()
+	serv := server.NewServer()
+	orchClient := server.NewOrchestratorClient("http://localhost:8080")
+
+	// Run periodic sync
+	go func() {
+		ticker := time.NewTicker(30 * time.Second)
+		for range ticker.C {
+			if err := serv.Catalog.SyncFromOrchestrator(orchClient); err != nil {
+				log.Printf("Sync failed: %v", err)
+			}
+		}
+	}()
 
 	// Create a done channel to signal when the shutdown is complete
 	done := make(chan bool, 1)
 
 	// Run graceful shutdown in a separate goroutine
-	go gracefulShutdown(server, done)
+	go gracefulShutdown(serv.Server, done)
 
-	err := server.ListenAndServe()
+	err := serv.Server.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		panic(fmt.Sprintf("http server error: %s", err))
 	}

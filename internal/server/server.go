@@ -2,9 +2,8 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
-	"os"
-	"strconv"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -13,17 +12,22 @@ import (
 )
 
 type Server struct {
-	port int
-
-	db database.Service
+	port    int
+	Catalog Catalog
+	db      database.Service
+	Server  *http.Server
 }
 
-func NewServer() *http.Server {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
+func NewServer() *Server {
+	port := 8000
+	catalog, err := NewCatalog("catalog")
+	if err != nil {
+		log.Println(fmt.Errorf("server failed to create catalog: %w", err))
+	}
 	NewServer := &Server{
-		port: port,
-
-		db: database.New(),
+		port:    port,
+		Catalog: *catalog,
+		db:      database.New(),
 	}
 
 	// Declare Server config
@@ -34,6 +38,6 @@ func NewServer() *http.Server {
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
-
-	return server
+	NewServer.Server = server
+	return NewServer
 }
